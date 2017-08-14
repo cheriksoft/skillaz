@@ -8,7 +8,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using UrlShortener.Entities;
+using UrlShortener.Infrastructure;
+using UrlShortener.Models.UrlEntries;
 using UrlShortener.MongoInfrastructure;
+using UrlShortener.Repositories;
 
 namespace UrlShortener
 {
@@ -38,6 +41,12 @@ namespace UrlShortener
             services.AddSingleton<IMongoDbProvider, MongoDbProvider>();
             services.AddSingleton<IMongoTableNameResolver, MongoTableNameResolver>();
             services.AddSingleton<IMongoCollectionProvider<IMongoEntity>, MongoCollectionProvider<IMongoEntity>>();
+
+            services.AddSingleton<IUrlIdGenerator, UrlIdGenerator>();
+            services.AddSingleton<IUrlIdStringConverter, IUrlIdStringConverter>();
+
+            services.AddScoped<IUrlEntryRepository, UrlEntryRepository>();
+            services.AddScoped<IUrlEntryModelBuilder, UrlEntryModelBuilder>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

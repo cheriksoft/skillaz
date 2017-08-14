@@ -1,4 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using UrlShortener.Entities;
@@ -17,7 +21,25 @@ namespace UrlShortener.Repositories
 
         public long GetMaxUrlId()
         {
-            return mongoCollectionProvider.Get<UrlEntry>().AsQueryable().Select(ue => ue.UrlId).DefaultIfEmpty(0).Max();
+            return mongoCollectionProvider.Get<UrlEntry>().AsQueryable().Select(ue => ue.UrlId).DefaultIfEmpty(62*62).Max();
+        }
+
+        public async Task<UrlEntry> FindByUrlIdAndIncrementVisitorsCount(long urlId)
+        {
+            return await mongoCollectionProvider.Get<UrlEntry>().FindOneAndUpdateAsync(
+                ue => ue.UrlId.Equals(urlId),
+                Builders<UrlEntry>.Update.Inc(ue => ue.VisitorsCount, 1));
+        }
+
+        public async Task<IList<UrlEntry>> GetByUserId(Guid userId)
+        {
+            return await mongoCollectionProvider.Get<UrlEntry>().AsQueryable().Where(ue => ue.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task AddUrlEntry(UrlEntry entry)
+        {
+            await mongoCollectionProvider.Get<UrlEntry>().InsertOneAsync(entry);
         }
     }
 }
