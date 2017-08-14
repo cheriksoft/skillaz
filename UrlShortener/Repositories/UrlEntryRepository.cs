@@ -21,7 +21,13 @@ namespace UrlShortener.Repositories
 
         public long GetMaxUrlId()
         {
-            return mongoCollectionProvider.Get<UrlEntry>().AsQueryable().Select(ue => ue.UrlId).DefaultIfEmpty(62*62).Max();
+            if (mongoCollectionProvider.Get<UrlEntry>().AsQueryable().Any())
+            {
+                return mongoCollectionProvider.Get<UrlEntry>().AsQueryable().Max(e => e.UrlId);
+            }
+
+            return 0;
+
         }
 
         public async Task<UrlEntry> FindByUrlIdAndIncrementVisitorsCount(long urlId)

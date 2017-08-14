@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using UrlShortener.Entities;
+using UrlShortener.Factories;
 using UrlShortener.Infrastructure;
 using UrlShortener.Models.UrlEntries;
 using UrlShortener.MongoInfrastructure;
@@ -53,6 +54,8 @@ namespace UrlShortener
 
             services.AddScoped<IUrlEntryRepository, UrlEntryRepository>();
             services.AddScoped<IUrlEntryModelBuilder, UrlEntryModelBuilder>();
+            services.AddScoped<IUrlEntryHandler, UrlEntryHandler>();
+            services.AddScoped<IUrlEntryFactory, UrlEntryFactory>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,6 +63,8 @@ namespace UrlShortener
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+
+            app.UseDeveloperExceptionPage();
 
             app.UseMvc();
 

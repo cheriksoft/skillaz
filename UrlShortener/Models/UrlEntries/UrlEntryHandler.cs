@@ -32,7 +32,7 @@ namespace UrlShortener.Models.UrlEntries
             if (request == null || string.IsNullOrWhiteSpace(request.Url))
                 return new UrlEntryHandlingResult("Пустой запрос");
 
-            if (!request.Url.StartsWith("http://") || !request.Url.StartsWith("https://"))
+            if (!request.Url.StartsWith("http://") && !request.Url.StartsWith("https://"))
                 return new UrlEntryHandlingResult("URL должен начинаться с http:// или https://");
 
             var urlId = urlIdGenerator.Get();
