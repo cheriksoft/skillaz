@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using UrlShortener.Entities;
+using UrlShortener.MongoInfrastructure;
 
 namespace UrlShortener
 {
@@ -29,6 +31,13 @@ namespace UrlShortener
         {
             // Add framework services.
             services.AddMvc();
+
+            services.Configure<MongoDbConfiguration>(Configuration.GetSection("MongoDb"));
+            services.AddOptions();
+
+            services.AddSingleton<IMongoDbProvider, MongoDbProvider>();
+            services.AddSingleton<IMongoTableNameResolver, MongoTableNameResolver>();
+            services.AddSingleton<IMongoCollectionProvider<IMongoEntity>, MongoCollectionProvider<IMongoEntity>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
