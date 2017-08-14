@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using UrlShortener.Entities;
 using UrlShortener.Infrastructure;
@@ -35,6 +37,8 @@ namespace UrlShortener
             // Add framework services.
             services.AddMvc();
 
+            services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             services.Configure<MongoDbConfiguration>(Configuration.GetSection("MongoDb"));
             services.AddOptions();
 
@@ -43,7 +47,9 @@ namespace UrlShortener
             services.AddSingleton<IMongoCollectionProvider<IMongoEntity>, MongoCollectionProvider<IMongoEntity>>();
 
             services.AddSingleton<IUrlIdGenerator, UrlIdGenerator>();
-            services.AddSingleton<IUrlIdStringConverter, IUrlIdStringConverter>();
+            services.AddSingleton<IUrlIdStringConverter, UrlIdStringConverter>();
+
+            services.AddScoped<ICookieSessionIdProvider, CookieSessionIdProvider>();
 
             services.AddScoped<IUrlEntryRepository, UrlEntryRepository>();
             services.AddScoped<IUrlEntryModelBuilder, UrlEntryModelBuilder>();
@@ -56,6 +62,8 @@ namespace UrlShortener
             loggerFactory.AddDebug();
 
             app.UseMvc();
+
+            app.UseMiddleware<StatusCodeExceptionHandler>();
         }
     }
 }
