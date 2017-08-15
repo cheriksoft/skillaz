@@ -51,6 +51,7 @@ namespace UrlShortener
             services.AddSingleton<IUrlIdStringConverter, UrlIdStringConverter>();
 
             services.AddScoped<ICookieSessionIdProvider, CookieSessionIdProvider>();
+            services.AddScoped<IShortUrlFormatter, ShortUrlFormatter>();
 
             services.AddScoped<IUrlEntryRepository, UrlEntryRepository>();
             services.AddScoped<IUrlEntryModelBuilder, UrlEntryModelBuilder>();

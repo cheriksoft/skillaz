@@ -19,15 +19,24 @@ namespace UrlShortener.Controllers
             this.urlEntryHandler = urlEntryHandler;
         }
 
-        [HttpGet]
+        [HttpGet("mylinks")]
         public Task<IList<UrlEntryItemModel>> GetUserEntries()
         {
-
-
             return urlEntryModelBuilder.GetForCurrentUser();
         }
 
-        [HttpPost]
+        [HttpGet("create")]
+        public async Task<UrlEntryHandlingResult> Create(string url)
+        {
+            var result = await urlEntryHandler.HandleAdd(url);
+
+            if (!result.Success)
+                Response.StatusCode = 400;
+
+            return result;
+        }
+
+        [HttpPost("create")]
         public async Task<UrlEntryHandlingResult> Create([FromBody]UrlEntryRequest request)
         {
             var result = await urlEntryHandler.HandleAdd(request);
@@ -44,7 +53,7 @@ namespace UrlShortener.Controllers
             var entry = urlEntryModelBuilder.GetByStringUrlId(urlId);
 
             Response.StatusCode = 302;
-            Response.Headers["Location"] = entry.Result.Url;
+            Response.Headers["Location"] = entry.Result.LongUrl;
         }
         
         

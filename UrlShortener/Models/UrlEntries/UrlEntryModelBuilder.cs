@@ -13,15 +13,18 @@ namespace UrlShortener.Models.UrlEntries
 {
     public class UrlEntryModelBuilder : IUrlEntryModelBuilder
     {
-        public ICookieSessionIdProvider CookieSessionIdProvider { get; }
+        private readonly ICookieSessionIdProvider cookieSessionIdProvider;
+        private readonly IShortUrlFormatter shortUrlFormatter;
         private readonly IUrlEntryRepository urlEntryRepository;
         private readonly IUrlIdStringConverter urlIdStringConverter;
 
         public UrlEntryModelBuilder(IUrlEntryRepository urlEntryRepository,
             IUrlIdStringConverter urlIdStringConverter,
-            ICookieSessionIdProvider cookieSessionIdProvider)
+            ICookieSessionIdProvider cookieSessionIdProvider,
+            IShortUrlFormatter shortUrlFormatter)
         {
-            CookieSessionIdProvider = cookieSessionIdProvider;
+            this.cookieSessionIdProvider = cookieSessionIdProvider;
+            this.shortUrlFormatter = shortUrlFormatter;
             this.urlEntryRepository = urlEntryRepository;
             this.urlIdStringConverter = urlIdStringConverter;
         }
@@ -37,15 +40,30 @@ namespace UrlShortener.Models.UrlEntries
                 throw new StatusCodeException(HttpStatusCode.NotFound);
             }
 
-            return new UrlEntryItemModel(urlIdStringConverter.ConvertFromNumber(entry.UrlId), entry.Url, entry.VisitorsCount);
+            return 
+                new UrlEntryItemModel(
+                    urlId,
+                    entry.Url,
+                    shortUrlFormatter.Format(urlId),
+                    entry.VisitorsCount);
         }
 
         public async Task<IList<UrlEntryItemModel>> GetForCurrentUser()
         {
-            var entries = await urlEntryRepository.GetByUserId(CookieSessionIdProvider.GetUserId());
+            var entries = await urlEntryRepository.GetByUserId(cookieSessionIdProvider.GetUserId());
 
-            return entries.Select(entry => new UrlEntryItemModel(urlIdStringConverter.ConvertFromNumber(entry.UrlId),
-                entry.Url, entry.VisitorsCount)).ToList();
+            return entries.Select(entry =>
+                    {
+                        var urlIdString = urlIdStringConverter.ConvertFromNumber(entry.UrlId);
+
+                        return new UrlEntryItemModel(
+                            urlIdString,
+                            entry.Url,
+                            shortUrlFormatter.Format(urlIdString),
+                            entry.VisitorsCount);
+                    }
+                )
+                .ToList();
         }
     }
 }
